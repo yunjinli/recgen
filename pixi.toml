@@ -118,10 +118,33 @@ extra-index-urls = ["https://download.pytorch.org/whl/cu118"]
 xformers = "==0.0.27.post2"
 spconv-cu118 = ">=2.3"
 
+# ── CUDA 12.8 feature ───────────────────────────────────────────────────
+[feature.cu128]
+channels = ["conda-forge"]
+
+[feature.cu128.pypi-dependencies]
+torch = "==2.7.1"          # concrete CUDA build selected per-cluster via extra-index-urls
+torchvision = "==0.22.1"
+xformers = "*"
+spconv-cu120 = ">=2.3"
+
+[feature.cu128.pypi-options]
+extra-index-urls = ["https://download.pytorch.org/whl/cu128"]
+
+[feature.cu128.activation.env]
+CUDA_HOME = "/usr/local/cuda-12.8/"
+
+[feature.cu128.tasks]
+post-install-cu128 = { cmd = "python -m pip install psutil packaging && python -m pip install --no-build-isolation flash-attn || echo 'flash-attn skipped, will use SDPA fallback'", description = "Install flash-attn (optional)" }
+build-nvdiffrast-cu128 = { cmd = "bash scripts/setup_cuda.sh --nvdiffrast", description = "Build nvdiffrast from source (needed for GLB export)" }
+build-gaussian-rasterizer-cu128  = { cmd = "bash scripts/setup_cuda.sh --diff-gaussian", description = "Build diff_gaussian_rasterization from source (needed for GLB export)" }
+
+
 # ── Environments ─────────────────────────────────────────────────────────
 [environments]
 default = { features = ["base", "cu121", "glb", "vis"], solve-group = "cu121" }
 cu118 = { features = ["base", "cu118", "glb", "vis"], solve-group = "cu118" }
+cu128 = {features = ["base", "cu128", "glb", "vis"], solve-group = "cu128"}
 train = { features = ["base", "cu121", "glb", "vis", "train"], solve-group = "cu121" }
 cu118-train = { features = ["base", "cu118", "glb", "vis", "train"], solve-group = "cu118" }
 eval = { features = ["base", "cu121", "glb", "vis", "eval"], solve-group = "cu121" }
